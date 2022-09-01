@@ -2,40 +2,56 @@ package cr.co.arevalo.test_ariel.queues;
 
 import cr.co.arevalo.test_ariel.exceptions.QueueOverflowException;
 import cr.co.arevalo.test_ariel.exceptions.QueueUnderflowException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.Semaphore;
 
+/**
+ * Concurrent capable queue that holds String objects.
+ */
 @Component
 public class ConcurrentQueue implements Queue< String >
 {
-    private final int DEFAULT_LENGTH = 10;
+    @Value( "${prodcons.queue.size}" )
+    private int size;
+
+    private final Semaphore canConsume;
+
+    private final Semaphore canProduce;
 
     private final SimpleStringQueue queue;
 
+    /**
+     * Constructor for the concurrent queue.
+     */
     public ConcurrentQueue()
     {
-        this.queue = new SimpleStringQueue( DEFAULT_LENGTH );
+        this.canConsume = new Semaphore( 0 );
+        this.canProduce = new Semaphore( size );
+        this.queue = new SimpleStringQueue( size );
     }
 
+    /**
+     * @inheritDoc
+     */
     @Override
-    synchronized public void push( String data ) throws QueueOverflowException, InterruptedException
+    public void push( String data ) throws QueueOverflowException, InterruptedException
     {
-        while(queue.getLength() >= queue.size) {
-            wait();
-        }
+        canProduce.acquire();
         queue.push( data );
-        notifyAll();
+        canConsume.release();
     }
 
+    /**
+     * @inheritDoc
+     */
     @Override
-    synchronized public String pop() throws QueueUnderflowException, InterruptedException
+    public String pop() throws QueueUnderflowException, InterruptedException
     {
-        while(queue.getLength() <= 0) {
-            wait();
-        }
+        canConsume.acquire();
         String out = queue.pop();
-        notifyAll();
+        canProduce.release();
         return out;
     }
 }

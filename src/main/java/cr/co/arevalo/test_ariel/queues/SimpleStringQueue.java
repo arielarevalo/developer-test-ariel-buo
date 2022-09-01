@@ -4,29 +4,30 @@ import cr.co.arevalo.test_ariel.exceptions.QueueOverflowException;
 import cr.co.arevalo.test_ariel.exceptions.QueueUnderflowException;
 
 /**
- * QUEUE CAPACITY IS ONE LESS THAN TOTAL LENGTH OF ARRAY
+ * Simple queue that holds String objects.
  */
 public class SimpleStringQueue implements Queue< String >
 {
-    public final int size;
-
     private final String[] queue;
 
     private int head;
 
     private int tail;
 
-    private int length;
-
+    /**
+     * Constructor for the simple string queue.
+     * @param size maximum size of the queue
+     */
     public SimpleStringQueue( final int size )
     {
         this.queue = new String[ size + 1 ];
-        this.size = size;
         this.head = 0;
         this.tail = 0;
-        this.length = 0;
     }
 
+    /**
+     * @inheritDoc
+     */
     @Override
     public void push( String data ) throws QueueOverflowException
     {
@@ -37,9 +38,11 @@ public class SimpleStringQueue implements Queue< String >
 
         queue[ tail ] = data;
         tail = getNextPos( tail );
-        ++length;
     }
 
+    /**
+     * @inheritDoc
+     */
     @Override
     public String pop() throws QueueUnderflowException
     {
@@ -50,15 +53,14 @@ public class SimpleStringQueue implements Queue< String >
 
         String out = queue[ head ];
         head = getNextPos( head );
-        --length;
         return out;
     }
 
-    public int getLength()
-    {
-        return length;
-    }
-
+    /**
+     * Returns the next position for the head or tail.
+     * @param pos current position
+     * @return the next position¿
+     */
     private int getNextPos( int pos )
     {
         if ( pos == queue.length - 1 )
