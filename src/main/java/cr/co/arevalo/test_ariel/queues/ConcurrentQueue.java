@@ -13,8 +13,7 @@ import java.util.concurrent.Semaphore;
 @Component
 public class ConcurrentQueue implements Queue< String >
 {
-    @Value( "${prodcons.queue.size}" )
-    private int size;
+    private int size = 10;
 
     private final Semaphore canConsume;
 
