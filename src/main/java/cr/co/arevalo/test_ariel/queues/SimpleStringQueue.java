@@ -1,4 +1,4 @@
-package cr.co.arevalo.test_ariel;
+package cr.co.arevalo.test_ariel.queues;
 
 import cr.co.arevalo.test_ariel.exceptions.QueueOverflowException;
 import cr.co.arevalo.test_ariel.exceptions.QueueUnderflowException;
@@ -8,17 +8,23 @@ import cr.co.arevalo.test_ariel.exceptions.QueueUnderflowException;
  */
 public class SimpleStringQueue implements Queue< String >
 {
+    public final int size;
+
     private final String[] queue;
 
     private int head;
 
     private int tail;
 
-    public SimpleStringQueue( final int length )
+    private int length;
+
+    public SimpleStringQueue( final int size )
     {
-        this.queue = new String[ length + 1 ];
+        this.queue = new String[ size + 1 ];
+        this.size = size;
         this.head = 0;
         this.tail = 0;
+        this.length = 0;
     }
 
     @Override
@@ -31,6 +37,7 @@ public class SimpleStringQueue implements Queue< String >
 
         queue[ tail ] = data;
         tail = getNextPos( tail );
+        ++length;
     }
 
     @Override
@@ -43,7 +50,13 @@ public class SimpleStringQueue implements Queue< String >
 
         String out = queue[ head ];
         head = getNextPos( head );
+        --length;
         return out;
+    }
+
+    public int getLength()
+    {
+        return length;
     }
 
     private int getNextPos( int pos )
