@@ -3,6 +3,7 @@ package cr.co.arevalo.test_ariel.prodcons;
 import cr.co.arevalo.test_ariel.queues.Queue;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -11,25 +12,34 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * NO INTERFACE SINCE NO CONTACT
+ * Produces phone numbers with text endings.
  */
 @Component
 @Slf4j
-public class Producer
+public class TextNumberProducer
 {
+    @Value("${prodcons.producers}")
+    private int producers;
+
+    @Value( "${prodcons.iterations}" )
+    private int iterations;
+
     @Autowired
     private Queue< String > concurrentQueue;
 
     @PostConstruct
     private void run()
     {
-        ExecutorService executorService = Executors.newFixedThreadPool( 2 );
-        for ( int i = 0; i < 15; ++i )
+        ExecutorService executorService = Executors.newFixedThreadPool( producers );
+        for ( int i = 0; i < iterations; ++i )
         {
             executorService.submit( this::produce );
         }
     }
 
+    /**
+     * Produces a phone number with a text ending.
+     */
     private void produce()
     {
         try
@@ -42,6 +52,10 @@ public class Producer
         }
     }
 
+    /**
+     * Returns a random string.
+     * @return a random string
+     */
     private String getRandomString()
     {
         final int letterA = 65;
