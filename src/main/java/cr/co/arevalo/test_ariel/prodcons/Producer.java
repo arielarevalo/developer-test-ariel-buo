@@ -11,7 +11,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * NO INTERFACE SINCE NO CONTACT
+ * Produces phone numbers with text endings.
  */
 @Component
 @Slf4j
@@ -30,6 +30,9 @@ public class Producer
         }
     }
 
+    /**
+     * Produces a phone number with a text ending.
+     */
     private void produce()
     {
         try
@@ -42,6 +45,10 @@ public class Producer
         }
     }
 
+    /**
+     * Returns a random string.
+     * @return a random string
+     */
     private String getRandomString()
     {
         final int letterA = 65;
