@@ -34,14 +34,14 @@ public class AsynchService
     @EventListener( ApplicationReadyEvent.class )
     public void startProdcons()
     {
-        for ( int i = 0; i < producers; ++i )
-        {
-            simpleAsyncTaskExecutor.execute( applicationContext.getBean( TextNumberProducer.class ) );
-        }
-
         for ( int i = 0; i < consumers; ++i )
         {
             simpleAsyncTaskExecutor.execute( applicationContext.getBean( TextNumberConsumer.class ) );
+        }
+
+        for ( int i = 0; i < producers; ++i )
+        {
+            simpleAsyncTaskExecutor.execute( applicationContext.getBean( TextNumberProducer.class ) );
         }
     }
 }

@@ -11,33 +11,37 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 @SpringBootApplication
-@EnableAsync(proxyTargetClass = true)
+@EnableAsync( proxyTargetClass = true )
 public class TestArielApplication
 {
-    @Value("${prodcons.consumers.number}")
+    @Value( "${prodcons.consumers.number}" )
     private int consumers;
 
-    @Value("${prodcons.producers.number}")
+    @Value( "${prodcons.producers.number}" )
     private int producers;
 
     /**
      * Sets up configuration for the task executor.
+     *
      * @return the task executor
      */
     @Bean
-    public TaskExecutor simpleAsyncTaskExecutor() {
+    public TaskExecutor simpleAsyncTaskExecutor()
+    {
         SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor();
-        executor.setConcurrencyLimit( consumers + producers );
+        executor.setConcurrencyLimit( consumers + producers + 1 ); // Plus main thread
         return executor;
     }
 
     /**
      * Sets up configuration for an application wide logger.
+     *
      * @return the logger
      */
     @Bean
-    public Logger log() {
-        return LoggerFactory.getLogger(TestArielApplication.class);
+    public Logger log()
+    {
+        return LoggerFactory.getLogger( TestArielApplication.class );
     }
 
     public static void main( String[] args )

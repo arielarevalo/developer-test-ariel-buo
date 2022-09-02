@@ -3,6 +3,7 @@ package cr.co.arevalo.test_ariel.concurrent.prodcons;
 import cr.co.arevalo.test_ariel.concurrent.queues.Queue;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -12,11 +13,19 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Slf4j
-@Scope("prototype")
+@Scope( "prototype" )
 public class TextNumberConsumer implements Runnable
 {
-    @Autowired
+    @Value( "${phone.prefix}" )
+    String prefix;
+
     private Queue< String > concurrentQueue;
+
+    @Autowired
+    public TextNumberConsumer( Queue< String > concurrentQueue )
+    {
+        this.concurrentQueue = concurrentQueue;
+    }
 
     @Async
     @Override
@@ -28,6 +37,9 @@ public class TextNumberConsumer implements Runnable
     private void consumeForever()
     {
         assert ( concurrentQueue != null );
+
+        log.info( "Beginning consumption - Thread {}", Thread.currentThread().getId() );
+
         while ( true )
         {
             consume();
@@ -45,8 +57,9 @@ public class TextNumberConsumer implements Runnable
             String number = convertCharacters( numberWithText );
             number = trimAndFormat( number );
 
-            String prefix = "800-";
-            log.info( numberWithText + " => " + prefix + number );
+            log.info( "Consumed {} => {}{} - Thread {}.", numberWithText, prefix, number,
+                    Thread.currentThread().getId() );
+
         } catch ( InterruptedException ie )
         {
             log.error( "Thread has been interrupted.", ie );

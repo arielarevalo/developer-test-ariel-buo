@@ -15,19 +15,32 @@ import java.util.Random;
  */
 @Component
 @Slf4j
-@Scope("prototype")
+@Scope( "prototype" )
 public class TextNumberProducer implements Runnable
 {
+    @Value( "${phone.prefix}" )
+    String prefix;
+
     @Value( "${prodcons.producers.iterations}" )
     private int iterationsPerProducer;
 
+    private final Queue< String > concurrentQueue;
+
     @Autowired
-    private Queue< String > concurrentQueue;
+    public TextNumberProducer( Queue< String > concurrentQueue )
+    {
+        this.concurrentQueue = concurrentQueue;
+    }
 
     @Async
     @Override
     public void run()
     {
+        assert ( concurrentQueue != null );
+
+        log.info( "Beginning production for {} iterations - Thread {}.",
+                iterationsPerProducer, Thread.currentThread().getId() );
+
         for ( int i = 0; i < iterationsPerProducer; ++i )
         {
             produce();
@@ -41,8 +54,12 @@ public class TextNumberProducer implements Runnable
     {
         try
         {
-            String prefix = "800-";
-            concurrentQueue.push( prefix + getRandomString() );
+            String random = getRandomString();
+
+            log.info( "Producing {} - Thread {}", random, Thread.currentThread().getId() );
+
+            concurrentQueue.push( prefix + random );
+
         } catch ( InterruptedException ie )
         {
             log.error( "Thread has been interrupted.", ie );
