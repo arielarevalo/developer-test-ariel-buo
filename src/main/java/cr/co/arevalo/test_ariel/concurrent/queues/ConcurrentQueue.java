@@ -15,7 +15,8 @@ import java.util.concurrent.locks.ReentrantLock;
 @Component
 public class ConcurrentQueue implements Queue< String >
 {
-    private final Lock queueLock;
+    private final Object mutex;
+
     private final Semaphore canConsume;
 
     private final Semaphore canProduce;
@@ -25,9 +26,9 @@ public class ConcurrentQueue implements Queue< String >
     /**
      * Constructor for the concurrent queue.
      */
-    public ConcurrentQueue(@Value( "${prodcons.queue.size}" ) int size)
+    public ConcurrentQueue( @Value( "${prodcons.queue.size}" ) int size )
     {
-        this.queueLock = new ReentrantLock();
+        this.mutex = new Object();
         this.canConsume = new Semaphore( 0 );
         this.canProduce = new Semaphore( size );
         this.queue = new SimpleStringQueue( size );
@@ -40,12 +41,9 @@ public class ConcurrentQueue implements Queue< String >
     public void push( String data ) throws QueueOverflowException, InterruptedException
     {
         canProduce.acquire();
-        queueLock.tryLock();
-        try {
-            queue.push( data );
-        } finally
+        synchronized ( mutex )
         {
-            queueLock.unlock();
+            queue.push( data );
         }
         canConsume.release();
     }
@@ -58,12 +56,9 @@ public class ConcurrentQueue implements Queue< String >
     {
         canConsume.acquire();
         String out;
-        queueLock.tryLock();
-        try {
-            out = queue.pop();
-        } finally
+        synchronized ( mutex )
         {
-            queueLock.unlock();
+            out = queue.pop();
         }
         canProduce.release();
         return out;
