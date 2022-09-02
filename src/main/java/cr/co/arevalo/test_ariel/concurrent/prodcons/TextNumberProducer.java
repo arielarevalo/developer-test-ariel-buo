@@ -1,39 +1,36 @@
-package cr.co.arevalo.test_ariel.prodcons;
+package cr.co.arevalo.test_ariel.concurrent.prodcons;
 
-import cr.co.arevalo.test_ariel.queues.Queue;
+import cr.co.arevalo.test_ariel.concurrent.queues.Queue;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Produces phone numbers with text endings.
  */
 @Component
 @Slf4j
-public class TextNumberProducer
+@Scope("prototype")
+public class TextNumberProducer implements Runnable
 {
-    @Value("${prodcons.producers}")
-    private int producers;
-
-    @Value( "${prodcons.iterations}" )
-    private int iterations;
+    @Value( "${prodcons.producers.iterations}" )
+    private int iterationsPerProducer;
 
     @Autowired
     private Queue< String > concurrentQueue;
 
-    @PostConstruct
-    private void run()
+    @Async
+    @Override
+    public void run()
     {
-        ExecutorService executorService = Executors.newFixedThreadPool( producers );
-        for ( int i = 0; i < iterations; ++i )
+        for ( int i = 0; i < iterationsPerProducer; ++i )
         {
-            executorService.submit( this::produce );
+            produce();
         }
     }
 
@@ -54,6 +51,7 @@ public class TextNumberProducer
 
     /**
      * Returns a random string.
+     *
      * @return a random string
      */
     private String getRandomString()

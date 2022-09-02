@@ -8,6 +8,8 @@ spring:
 prodcons:
   queue:
     size: 10
-  producers: 2
-  consumers: 2
-  iterations: 15
+  producers:
+    number: 2
+    iterations: 15
+  consumers:
+    number: 2

@@ -1,38 +1,36 @@
-package cr.co.arevalo.test_ariel.prodcons;
+package cr.co.arevalo.test_ariel.concurrent.prodcons;
 
-import cr.co.arevalo.test_ariel.queues.Queue;
+import cr.co.arevalo.test_ariel.concurrent.queues.Queue;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Consumes phone numbers with text endings and converts the ending to numbers.
  */
 @Component
 @Slf4j
-public class TextNumberConsumer
+@Scope("prototype")
+public class TextNumberConsumer implements Runnable
 {
-    @Value("${prodcons.consumers}")
-    private int consumers;
-
-    @Value( "${prodcons.iterations}" )
-    private int iterations;
-
     @Autowired
     private Queue< String > concurrentQueue;
 
-    @PostConstruct
-    private void run()
+    @Async
+    @Override
+    public void run()
     {
-        ExecutorService executorService = Executors.newFixedThreadPool( consumers );
-        for ( int i = 0; i < iterations; ++i )
+        consumeForever();
+    }
+
+    private void consumeForever()
+    {
+        assert ( concurrentQueue != null );
+        while ( true )
         {
-            executorService.submit( this::consume );
+            consume();
         }
     }
 
@@ -58,6 +56,7 @@ public class TextNumberConsumer
 
     /**
      * Trims and formats a number according to telephone format.
+     *
      * @param number number to format
      * @return formatted number
      */
@@ -78,17 +77,19 @@ public class TextNumberConsumer
 
     /**
      * Converts characters into their corresponding dial pad numbers.
+     *
      * @param characters characters to convert
      * @return characters converted to their dial pad numbers
      */
     private String convertCharacters( String characters )
     {
         return characters.chars().skip( 4 ).map( this::convertLetter )
-                             .collect( StringBuilder::new, StringBuilder::append, StringBuilder::append ).toString();
+                         .collect( StringBuilder::new, StringBuilder::append, StringBuilder::append ).toString();
     }
 
     /**
      * Converts each character to its appropriate number on a phone dial pad.
+     *
      * @param letter numerical value of the character to convert
      * @return the appropriate number on a dial pad
      */

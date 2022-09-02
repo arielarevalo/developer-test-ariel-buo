@@ -2,7 +2,7 @@ package cr.co.arevalo.test_ariel;
 
 import cr.co.arevalo.test_ariel.exceptions.QueueOverflowException;
 import cr.co.arevalo.test_ariel.exceptions.QueueUnderflowException;
-import cr.co.arevalo.test_ariel.queues.SimpleStringQueue;
+import cr.co.arevalo.test_ariel.concurrent.queues.SimpleStringQueue;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

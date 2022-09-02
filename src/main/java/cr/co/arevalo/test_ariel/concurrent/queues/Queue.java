@@ -1,4 +1,4 @@
-package cr.co.arevalo.test_ariel.queues;
+package cr.co.arevalo.test_ariel.concurrent.queues;
 
 import org.springframework.stereotype.Component;
 

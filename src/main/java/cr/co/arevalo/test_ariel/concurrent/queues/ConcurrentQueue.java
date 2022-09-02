@@ -1,4 +1,4 @@
-package cr.co.arevalo.test_ariel.queues;
+package cr.co.arevalo.test_ariel.concurrent.queues;
 
 import cr.co.arevalo.test_ariel.exceptions.QueueOverflowException;
 import cr.co.arevalo.test_ariel.exceptions.QueueUnderflowException;
@@ -13,9 +13,6 @@ import java.util.concurrent.Semaphore;
 @Component
 public class ConcurrentQueue implements Queue< String >
 {
-    @Value( "${prodcons.queue.size}" )
-    private int size;
-
     private final Semaphore canConsume;
 
     private final Semaphore canProduce;
@@ -25,7 +22,7 @@ public class ConcurrentQueue implements Queue< String >
     /**
      * Constructor for the concurrent queue.
      */
-    public ConcurrentQueue()
+    public ConcurrentQueue(@Value( "${prodcons.queue.size}" ) int size)
     {
         this.canConsume = new Semaphore( 0 );
         this.canProduce = new Semaphore( size );
