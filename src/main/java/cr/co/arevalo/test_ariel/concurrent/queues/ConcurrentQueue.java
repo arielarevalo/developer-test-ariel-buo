@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Concurrent capable queue that holds String objects.
@@ -13,6 +15,7 @@ import java.util.concurrent.Semaphore;
 @Component
 public class ConcurrentQueue implements Queue< String >
 {
+    private final Lock queueLock;
     private final Semaphore canConsume;
 
     private final Semaphore canProduce;
@@ -24,6 +27,7 @@ public class ConcurrentQueue implements Queue< String >
      */
     public ConcurrentQueue(@Value( "${prodcons.queue.size}" ) int size)
     {
+        this.queueLock = new ReentrantLock();
         this.canConsume = new Semaphore( 0 );
         this.canProduce = new Semaphore( size );
         this.queue = new SimpleStringQueue( size );
@@ -36,7 +40,13 @@ public class ConcurrentQueue implements Queue< String >
     public void push( String data ) throws QueueOverflowException, InterruptedException
     {
         canProduce.acquire();
-        queue.push( data );
+        queueLock.tryLock();
+        try {
+            queue.push( data );
+        } finally
+        {
+            queueLock.unlock();
+        }
         canConsume.release();
     }
 
@@ -47,7 +57,14 @@ public class ConcurrentQueue implements Queue< String >
     public String pop() throws QueueUnderflowException, InterruptedException
     {
         canConsume.acquire();
-        String out = queue.pop();
+        String out;
+        queueLock.tryLock();
+        try {
+            out = queue.pop();
+        } finally
+        {
+            queueLock.unlock();
+        }
         canProduce.release();
         return out;
     }
